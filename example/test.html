@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>sprite extend curvejs test</title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+        #vessel {
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div id="vessel"></div>
+    <script src="./lib/Stats.min.js"></script>
+    <script src="./lib/spritejs.js"></script>
+    <script src="/js/sprite-extend-curvejs.js"></script>
+    <script>
+        function addStats() {
+            stats = new Stats();
+            stats.setMode(2);
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '600px';
+            stats.domElement.style.top = '0px';
+            document.body.appendChild(stats.domElement);
+        }
+        const {Scene, Group, Sprite, Curvejs}  = spritejs;
+
+
+        const scene = new Scene('#vessel', {
+            resolution: [1000, 1000],
+            viewport: ['auto', 'auto']
+        });
+
+        const layer = scene.layer('fglayer');
+        layer.canvas.style.backgroundColor = '#000000';
+
+        
+        const stage = new Curvejs.Stage(layer);
+
+        const rd = () => {
+            return -2 + Math.random() * 2;
+        };
+        
+        const curve = new Curvejs.Curve({
+            color: '#00FF00',
+            points: [100, 100, 230, 314, 236, 326, 257, 326],
+            data: {angle: 0, r:5 ,step:Math.PI / 50 },
+            motion: Curvejs.motion.dance
+        })
+        stage.add(curve)
+
+        function tick(){
+            stats.update();
+            stage.update()
+            requestAnimationFrame(tick)
+        }
+        addStats()
+        tick()
+    </script>
+</body>
+</html>
