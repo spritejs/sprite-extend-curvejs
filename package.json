@@ -1,6 +1,6 @@
 {
   "name": "sprite-extend-curvejs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "this is a spritejs extension for curvejs",
   "main": "lib/index.js",
   "author": "betseyliu",
