@@ -50,9 +50,29 @@
         
         const curve = new Curvejs.Curve({
             color: '#00FF00',
-            points: [100, 100, 230, 314, 236, 326, 257, 326],
-            data: {angle: 0, r:5 ,step:Math.PI / 50 },
-            motion: Curvejs.motion.dance
+            points: [277, 327, 230, 314, 236, 326, 257, 326],
+            data: [rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()],
+            motion: function motion(points, data) {
+                points.forEach(function (item, index) {
+                points[index] += data[index]
+
+                if (points[index] < 0) {
+                    points[index] = 0
+                    data[index] *= -1
+                }
+                if (index % 2 === 0) {
+                    if (points[index] > layer.canvas.width) {
+                    points[index] = layer.canvas.width
+                    data[index] *= -1
+                    }
+                } else {
+                    if (points[index] > layer.canvas.height) {
+                    points[index] = layer.canvas.height
+                    data[index] *= -1
+                    }
+                }
+                })
+            }
         })
         stage.add(curve)
 

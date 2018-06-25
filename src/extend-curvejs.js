@@ -1,7 +1,8 @@
 import {Path, Group} from 'sprite-core';
 import sCurve  from './curve';
+import sSmoothCurve from './smoothCurve';
 
-import {Stage as Cstage , Curve as Ccurve, motion} from 'curvejs';
+import {Stage as Cstage , Curve as Ccurve, SmoothCurve as CsmoothCurve, motion} from 'curvejs';
 
 
 
@@ -46,6 +47,7 @@ class Curve extends Ccurve {
             const curve = new sCurve();
             curve.attr({
                color: this.color,
+               pos: [this.x, this.y],
             });
             this.visionGroup.append(curve);
         }
@@ -94,6 +96,73 @@ class Curve extends Ccurve {
     }
 }
 
+// rewrite SmoothCurve in curvejs
+class SmoothCurve extends CsmoothCurve {
+  constructor(option){
+    super(option);
+  }
+
+  _initVision(visionCount = 80) {
+    this.visionGroup = new Group();
+    this.isGroupAddToLayer = false;
+    const curveCount = this.disableVision ? 1 : this.visionMax;
+
+    for(let i = 0; i < curveCount; i++) {
+        const curve = new sSmoothCurve();
+        curve.attr({
+          color: this.color,
+          pos: [this.x, this.y],
+        });
+        this.visionGroup.append(curve)
+    }
+
+    for(let i = 0; i < visionCount; i++) {
+      this.tick(true)
+    }
+  }
+
+  tick(tickSelf){
+    this._now = Date.now();
+    if (this._now - this._preDate > this.visionInterval || tickSelf) {
+        this.vision = this.vision.concat([this.points.slice(0)]);
+        if (this.vision.length > this.visionMax) {
+            this.vision.splice(0, 1)
+        };
+        this._preDate = this._now;
+    }
+
+    if(!this.pauseMotion) {
+        this.motion.call(this, this.points, this.data);
+    }
+
+    if(this._targetPoints){
+        this._pointsTo();
+    }
+  }
+
+  draw(layer){
+    if(!this.isGroupAddToLayer) {
+        layer.append(this.visionGroup);
+        this.isGroupAddToLayer = true;
+    }
+    this.tick();
+    const ctx = layer.canvas.getContext('2d');
+    this.beforeDraw.call(this, ctx)
+
+    const lastIndex = this.visionGroup.children.length - 1;
+    this.visionGroup.children.forEach((va, index) => {
+        const path = this.vision[index]
+        const opacity = index === lastIndex ? 1 : index / this.visionMax * this.visionAlpha;
+        va.attr({
+          opacity,
+          d: path
+        })
+    })
+    this.afterDraw.call(this, ctx);
+  }
+
+}
+
 export {
-    Stage, Curve, motion,
+    Stage, Curve, SmoothCurve, motion
 };

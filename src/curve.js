@@ -4,13 +4,12 @@ import {findColor} from 'sprite-core/lib/helpers/render';
 
 // create a new kind of sprite
 class Curve extends BaseSprite {
-
   get contentSize() {
     let [width, height] = this.attr('size');
-    if(width === '') {
+    if(width === '' && this.layer) {
         width = this.layer.canvas.clientWidth;
     }
-    if(height === '') {
+    if(height === '' && this.layer) {
         height = this.layer.canvas.clientHeight;
     }
     return [width, height];
@@ -32,8 +31,7 @@ class Curve extends BaseSprite {
 Curve.defineAttributes({
   init(attr) {
     attr.setDefault({
-        color: parseColorString('white'),
-        d: [0, 0, 0, 0, 0, 0, 0, 0]
+        color: parseColorString('white')
     });
   },
   color(attr, val) {

@@ -1,4 +1,4 @@
 // for webpack build
-import {Stage, Curve, motion} from './extend-curvejs.js'
+import {Stage, Curve, motion, SmoothCurve} from './extend-curvejs.js'
 
-module.exports = {Stage, Curve, motion}
+module.exports = {Stage, Curve, motion, SmoothCurve}

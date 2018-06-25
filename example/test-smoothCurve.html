@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>sprite extend smooth curve test</title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+        #vessel {
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div id="vessel"></div>
+    <script src="./lib/Stats.min.js"></script>
+    <script src="./lib/spritejs.js"></script>
+    <script src="/js/sprite-extend-curvejs.js"></script>
+    <script>
+
+        class SiriWave {
+            constructor(opt) {
+                this.opt = opt || {};
+
+                this.K = 2;
+                this.F = 6;
+                this.speed = this.opt.speed || 0.1;
+                this.noise = this.opt.noise || 0;
+                this.phase = this.opt.phase || 0;
+
+                this.width = this.opt.width || 320;
+                this.height = this.opt.height || 100;
+
+                this.list = []
+            }
+
+            _globalAttenuationFn(x) {
+                //http://www.wolframalpha.com/input/?i=pow(2*4%2F(2*4%2Bpow(x,4)),2*2)
+                return Math.pow(this.K * 4 / (this.K * 4 + Math.pow(x, 4)), this.K * 2);
+            }
+
+            _drawLine(attenuation) {
+                var x, y;
+                this.list.length = 0
+                for (var i = -this.K; i <= this.K; i += 0.1) {
+                    x = this.width * ((i + this.K) / (this.K * 2));
+                    y = this.height / 2 + this.noise * this._globalAttenuationFn(i) * (1 / attenuation) * Math.sin(this.F * i - this.phase);
+                    this.list.push( x,y)
+                }
+            }
+
+            tick() {
+                this.phase = (this.phase + this.speed) % (Math.PI * 64);
+                this._drawLine(1);
+            }
+        }
+
+        function addStats() {
+            stats = new Stats();
+            stats.setMode(2);
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '600px';
+            stats.domElement.style.top = '0px';
+            document.body.appendChild(stats.domElement);
+        }
+        const {Scene, Group, Sprite, Curvejs}  = spritejs;
+
+
+        const scene = new Scene('#vessel', {
+            resolution: [1000, 1000],
+            viewport: ['auto', 'auto']
+        });
+
+        const layer = scene.layer('fglayer');
+        layer.canvas.style.backgroundColor = '#000000';
+
+        
+        const stage = new Curvejs.Stage(layer);
+
+        const rd = () => {
+            return -2 + Math.random() * 2;
+        };
+
+        const sw = new SiriWave({
+            width: 640,
+            height: 400,
+            speed:0.4,
+            noise:50
+        });
+
+
+        const curve = new Curvejs.SmoothCurve({
+            color: '#4EEE94',
+            visionMax: 10,
+            visionInterva: 10,
+            disableVision: true,
+        })
+
+        stage.add(curve);
+
+
+        function tick(){
+            sw.tick();
+            sw.noise = 50;
+            curve.points = sw.list.slice(0);
+            stats.update();
+            stage.update()
+            requestAnimationFrame(tick);
+        }
+        addStats()
+        tick()
+        // setInterval(tick, 1000)
+    </script>
+</body>
+</html>
